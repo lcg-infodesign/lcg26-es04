@@ -4,6 +4,7 @@ let maxMortality = 0;
 let totalDuration = 0;
 let continents = [];
 let backgroundColor = '#F5F5F5';
+let accentColor = '#66A9ED';
 
 // Margine attorno al grafico
 let margin = 20;
@@ -11,13 +12,11 @@ let margin = 20;
 // Spazio tra le barre del grafico
 let gutter = 4;
 
-// Associa ogni categoria del CSV a un colore: colorScale["europe"] restituisce "red".
-let colorScale = {
-  'europe': '#66A9ED',
-  'asia': '#ED66ED',
-  'africa': '#EDA966',
-  'america': '#66ED66',
-}
+// Variabili per l'interazione col mouse
+let hoveredLabel = "";
+let hoveredId = null;
+let hovered = false;
+
 
 // In p5.js 2, setup() può attendere il caricamento degli asset con async/await.
 async function setup() {
@@ -40,13 +39,6 @@ async function setup() {
 
     // Il totale delle durate serve a distribuire le barre lungo tutta la larghezza del canvas.
     totalDuration += duration;
-
-    // Raccoglie i continenti senza duplicati; questa lista può servire, per esempio, per una legenda.
-    let continent = data.getString(rowNumber, "continent");
-
-    if (!continents.includes(continent)) {
-      continents.push(continent);
-    }
   }
 }
 
@@ -63,7 +55,10 @@ function draw() {
 
   // xPos tiene traccia di dove iniziare la prossima barra; label contiene il testo da mostrare.
   let xPos = margin;
-  let label = "";
+
+  // Riparte da "nessuna barra sotto il mouse" a ogni fotogramma.
+  hovered = false;
+
   // Evita il bordo predefinito delle forme.
   noStroke();
 
@@ -71,15 +66,16 @@ function draw() {
   for (let rowNumber = 0; rowNumber < data.getRowCount(); rowNumber++) {
     let currentMortality = data.getNum(rowNumber, "Excess Mortality midpoint");
     let currentDuration = data.getNum(rowNumber, "duration");
-    let continent = data.getString(rowNumber, "continent");
     let country = data.getString(rowNumber, "Country");
+    let id = data.getString(rowNumber, "famine_id");
 
     // map() trasforma i dati in dimensioni visive: durata -> larghezza, mortalità -> altezza.
     let scaledDuration = map(currentDuration, 0, totalDuration, 0, barsWidth);
     let scaledMortality = map(currentMortality, 0, maxMortality, 0, height - 2 * margin);
 
     // Imposta il colore in base al continente e disegna il rettangolo dentro il margine superiore.
-    fill(colorScale[continent]);
+    fill(backgroundColor);
+    stroke(accentColor);
     rect(xPos, margin, scaledDuration, scaledMortality);
 
     // Verifica se il puntatore si trova dentro questa barra e memorizza il paese corrispondente.
@@ -89,7 +85,9 @@ function draw() {
       mouseY >= margin &&
       mouseY <= margin + scaledMortality
     ) {
-      label = country;
+      hoveredLabel = country;
+      hoveredId = id;
+      hovered = true;
     }
 
     // Sposta la prossima barra dopo quella corrente, lasciando il gutter tra le due.
@@ -97,10 +95,25 @@ function draw() {
   }
 
   // Mostra il paese vicino al puntatore solo quando questo si trova sopra una barra.
-  if (label != "") {
+  if (hovered) {
+    cursor(HAND);
     fill(0);
     stroke(backgroundColor);
     // L'offset evita di disegnare il testo esattamente sotto il puntatore.
-    text(label, mouseX + 8, mouseY + 16);
+    text(hoveredLabel, mouseX + 8, mouseY + 16);
+  } else {
+    cursor(ARROW);
   }
+}
+
+function mousePressed() {
+  // Define parameters
+
+  // Build the new URL. same rott, but the pafe is page.html
+  let newURL = "detail.html?famine=" + hoveredId;
+
+  console.log(newURL);
+
+  // Redirect in the same tab
+  window.location.href = newURL;
 }
