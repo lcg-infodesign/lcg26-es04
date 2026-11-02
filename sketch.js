@@ -3,6 +3,7 @@ let data;
 let maxMortality = 0;
 let totalDuration = 0;
 let continents = [];
+let backgroundColor = '#F5F5F5';
 
 // Margine attorno al grafico
 let margin = 20;
@@ -52,7 +53,7 @@ async function setup() {
 // draw() viene ripetuta continuamente: ridisegna il grafico e aggiorna l'interazione col mouse.
 function draw() {
   // Pulisce il fotogramma precedente; il numero indica una tonalità di grigio (0-255).
-  background(245);
+  background(backgroundColor);
 
   // Sottrae margini e gutter dalla larghezza per mantenere tutto il grafico dentro il canvas.
   let numberOfGutters = data.getRowCount() - 1;
@@ -98,6 +99,7 @@ function draw() {
   // Mostra il paese vicino al puntatore solo quando questo si trova sopra una barra.
   if (label != "") {
     fill(0);
+    stroke(backgroundColor);
     // L'offset evita di disegnare il testo esattamente sotto il puntatore.
     text(label, mouseX + 8, mouseY + 16);
   }
